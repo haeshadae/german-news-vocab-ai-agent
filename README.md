@@ -75,7 +75,7 @@ Example: Angesichts dieser Zahlen schlug Hessens Innenminister Roman Poseck vor,
 
 ## Importing the Workflow
 
-1. Import `workflow.json` into n8n
+1. Import `My workflow.json` into n8n
 2. Connect your OpenAI, Google Sheets, and Gmail credentials
 3. Update the Google Sheet target if needed
 4. Activate the schedule trigger
