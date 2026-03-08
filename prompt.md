@@ -38,6 +38,17 @@ Allowed types:
 - Redewendung
 - Feste Phrase
 
+NVV (Nomen-Verb-Verbindung):
+A fixed noun-verb construction where the verb is semantically weak and the noun carries the meaning.
+The verb must appear explicitly in the phrase.
+
+Correct examples:
+- eine Entscheidung treffen
+- Stellung nehmen
+- in Kraft treten
+- zur Verfügung stellen
+- eine Rolle spielen
+
 Prefer reusable journalistic vocabulary such as abstract nouns, advanced verbs/adjectives, institutional language, and common news phrases.
 
 OUTPUT FIELDS
