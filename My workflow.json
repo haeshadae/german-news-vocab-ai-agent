@@ -1,0 +1,435 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7,
+              "triggerAtMinute": 30
+            },
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "22fda9d9-27ff-488e-a311-52bdd27430b7",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU",
+          "mode": "list",
+          "cachedResultName": "Daily Vocab Practice_German",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "fb5153fe-4190-40fe-b574-b85ef5877169",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "psefR3JBf03o7oJT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst rows = $input.all();\nconst existingWords = rows\n  .map(r => r.json[\"Word/Phrase\"])\n  .filter(Boolean)\n  .map(w => w.toLowerCase().trim());\nreturn [{ json: { existingWords: existingWords.length ? existingWords : [] } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        0
+      ],
+      "id": "a04b9620-3994-4820-8489-83958fb30f4a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a German vocabulary hunting agent. Find exactly 5 NEW German vocabulary items from today's tagesschau.de articles and write them to Google Sheets.\n\nYou have two tools:\n- scrape_url\n- write_to_sheet\n\nARTICLE PREFERENCES\nPrefer:\n- /inland/\n- /ausland/\n- /wirtschaft/\n- /wissen/\n- /panorama/\n\nAvoid:\n- sports\n- weather\n- live tickers\n- video-only pages\n\nVOCAB SELECTION\nFind exactly 5 items that are:\n- new\n- B2, C1, or C2 level\n- useful for advanced learners\n\nDo not select:\n- basic vocabulary\n- proper nouns\n- names of people, organizations, or locations\n- numbers or dates\n- duplicate meanings\n- near-duplicates of another selected item\n\nAllowed types:\n- Einzelwort\n- NVV\n- Redewendung\n- Feste Phrase\n\nPrefer reusable journalistic vocabulary such as abstract nouns, advanced verbs/adjectives, institutional language, and common news phrases.\n\nOUTPUT FIELDS\nFor each item include:\n- date\n- word_phrase\n- translation\n- example_sentence\n- difficulty\n- type\n- source_url\n\nFIELD RULES\n- word_phrase: use base form or infinitive form\n- translation: concise English only\n- example_sentence: one full sentence from the article\n- difficulty: must be exactly B2, C1, or C2\n- type: must be exactly Einzelwort, NVV, Redewendung, or Feste Phrase\n\nSOURCE URL RULE\nWrite the article URL only on the first item from each article.\nFor subsequent items from the same article, set source_url to \"\".\n\nDUPLICATES\nDo not add any item that already appears in the list below, case-insensitively.\nAlready in sheet: {{ $json.existingWords }}\n\nAlso check for duplicates within this same run.\nDo not select two items that are identical or near-duplicates of each other.\n\nEXECUTION PLAN\n1. Scrape the tagesschau homepage to identify candidate articles.\n2. Choose suitable articles from the preferred sections.\n3. Start by scraping up to 3 articles.\n4. Extract candidate advanced vocabulary from those articles.\n5. If you already have 5 strong final items, stop scraping.\n6. If you do not yet have 5 strong final items after 3 articles, continue scraping additional suitable articles one at a time until you can finalize exactly 5 items.\n7. Stop scraping as soon as you have 5 strong final items.\n8. Group the final items by article.\n9. Write the 5 vocabulary rows.\n10. Write 1 blank spacer row.\n\nWRITING RULES\nDo not write anything until all 5 items are finalized.\nCall write_to_sheet once per item as a flat object.\nNever wrap items in a rows array.\n\nAfter the 5 vocabulary rows, write one blank spacer row with empty strings for all fields.\n\nFINAL CHECK BEFORE WRITING\nEnsure:\n- there are exactly 5 items\n- all 5 items are unique\n- none already appears in {{ $json.existingWords }}\n- none duplicates another selected item in this same run\n- all items are B2/C1/C2\n- all required fields are filled\n- source_url appears only on the first row of each article group",
+        "options": {
+          "maxIterations": 20
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        0
+      ],
+      "id": "bf2b5611-c121-42d3-8921-128ffc31d7b0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        208
+      ],
+      "id": "055c1f38-04af-43f4-ba3c-0de9d35766d7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "pwHfOignqDcvd7wq",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetches the HTML content of a given URL and returns readable text",
+        "url": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('URL', ``, 'string') }}",
+        "options": {},
+        "optimizeResponse": true,
+        "responseType": "html",
+        "onlyContent": true,
+        "truncateResponse": true,
+        "maxLength": 20000
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        208
+      ],
+      "id": "8e92ae89-fc28-4d56-8064-94afa83a4f30",
+      "name": "scrape_url"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Appends all 7 vocabulary items to the German vocab sheet. Call this ONCE at the end with all items as a batch.",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU",
+          "mode": "list",
+          "cachedResultName": "Daily Vocab Practice_German",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $fromAI('date') }}",
+            "Word/Phrase": "={{ $fromAI('word_phrase') }}",
+            "Translation": "={{ $fromAI('translation') }}",
+            "Example (DE)": "={{ $fromAI('example_sentence') }}",
+            "Difficulty": "={{ $fromAI('difficulty') }}",
+            "Source URL": "={{ $fromAI('source_url') }}",
+            "Type": "={{ $fromAI('type') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Word/Phrase",
+              "displayName": "Word/Phrase",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Translation",
+              "displayName": "Translation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Example (DE)",
+              "displayName": "Example (DE)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Difficulty",
+              "displayName": "Difficulty",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Type",
+              "displayName": "Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        304
+      ],
+      "id": "bb862f61-1e74-4ed6-82a3-d2bf593aab3e",
+      "name": "write_to_sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "psefR3JBf03o7oJT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU",
+          "mode": "list",
+          "cachedResultName": "Daily Vocab Practice_German",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yIKkQZXlzVHwVu950MBbbOlForerhZSnBHnaQbpNgpU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        0
+      ],
+      "id": "22f9cd07-d099-40b4-9658-a9506a5ccee6",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "psefR3JBf03o7oJT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// get all rows from sheet\nconst rows = $input.all().map(i => i.json);\n\n// remove blank spacer rows\nconst filtered = rows.filter(r => r[\"Word/Phrase\"]);\n\n// take the newest 5 vocab rows\nconst lastFive = filtered.slice(-5);\n\n// build formatted email body\nconst formattedMessage = `\n<h2>Good morning Shadae! Here's your daily vocab list:</h2>\n\n${lastFive.map((row, i) => `\n<p>\n<b>${i + 1}. ${row[\"Word/Phrase\"]} (${row[\"Difficulty\"]})</b><br>\nMeaning: ${row[\"Translation\"]}<br>\nExample: ${row[\"Example (DE)\"]}\n</p>\n`).join(\"\")}\n`;\n\nreturn [\n  {\n    json: {\n      emailBody: formattedMessage\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "51225111-a24c-4945-8812-921a396690e1",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "shadaeby@gmail.com",
+        "subject": "=🇩🇪 Tagesschau Vocabulary – {{ new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) }}",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "784d938b-d9a7-458b-9b63-b6629f4d2774",
+      "name": "Send a message",
+      "webhookId": "7e2c548c-3c01-4d14-9c8b-2a7f6dd0e693",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vhzJ9CqWUFxn9iXf",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape_url": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "write_to_sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "509cf9af-3c5b-4e2d-9abc-acd479d26de7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ee5064dda788efbe75776fbf472b10721776990da1e26785259eeb15ab44e4e8"
+  },
+  "id": "tKNfnDF00k0cOLGe",
+  "tags": []
+}
