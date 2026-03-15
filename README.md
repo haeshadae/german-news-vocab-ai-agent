@@ -3,6 +3,8 @@
 
 An automated AI agent that extracts advanced German vocabulary from daily news articles on Tagesschau and delivers a curated vocabulary digest by email.
 
+🎥 **Demo Video:** [Watch the demo](https://drive.google.com/file/d/10SBNoppk82t5WJh_4YvkquMSzZ7eEUld/view?usp=drive_link)
+
 ## Overview
 
 This project uses an AI agent to scrape the German news site Tagesschau, identify advanced vocabulary (B2–C2), and compile a daily learning digest.
