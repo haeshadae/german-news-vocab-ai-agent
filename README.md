@@ -25,7 +25,7 @@ Workflow built with **n8n**:
 
 Schedule Trigger → Vocabulary Agent → Google Sheets → Email Digest
 
-![Workflow Architecture](AI agent_architecture.png)
+![Workflow Architecture](AI_agent_architecture.png)
 
 ### Tools Used
 
